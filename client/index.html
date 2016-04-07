@@ -1,0 +1,45 @@
+<body>
+  <div> nick: <input id="nickInput" /> </div>
+  <div> msg: <input id="messageInput" onkeypress="sendIfEnter(event)"/> </div>
+  <div> hit enter to send </div>
+  <h3>
+    Message log:
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <button onclick="clear()">Clear</button>
+  </h3>
+  <div id="log">
+  </div>
+</body>
+
+<script>
+window.onload = function() {
+
+// Note ATM that the path doesn't matter for routing; any WebSocket
+// connection gets bumped over to WebSocket consumers
+var socket = new WebSocket("ws://127.0.0.1:8000/chat/");
+var log = document.getElementById('log');
+var messageInput = document.getElementById('messageInput');
+var nickInput = document.getElementById('nickInput');
+
+socket.onmessage = function(e) {
+  var div = document.createElement('div');
+  div.textContent = e.data;
+  log.appendChild(div);
+}
+
+document.clear = function() {
+  log.innerHTML = "";
+};
+document.sendIfEnter = function(e) {
+  if(e.keyCode == 13) {
+    var data = {
+      user: nickInput.value,
+      text: messageInput.value,
+    }
+    socket.send(JSON.stringify(data))
+    messageInput.value = '';
+  }
+}
+
+}
+</script>
